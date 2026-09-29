@@ -1,17 +1,13 @@
 import type { StoreSettings } from "@/lib/settings";
 
 export function AnnouncementBar({ settings }: { settings: StoreSettings }) {
-  const shipping =
-    settings.freeShippingAbove > 0
-      ? `FREE SHIPPING ON ORDERS ABOVE ₹${settings.freeShippingAbove}`
-      : "ALL OVER INDIA SHIPPING AVAILABLE";
+  const freeAbove = settings.freeShippingAbove > 0 ? settings.freeShippingAbove : 1499;
 
   const segments = [
+    `FREE SHIPPING ON PREPAID ORDERS ABOVE ₹${freeAbove}`,
     "SHIPPING ALL OVER INDIA",
-    shipping,
-    "PREMIUM FOOTWEAR IN DURG",
+    `FREE SHIPPING ON PREPAID ORDERS ABOVE ₹${freeAbove}`,
     "SHIPPING ALL OVER INDIA",
-    shipping,
   ];
 
   const line = segments.join("   •   ");

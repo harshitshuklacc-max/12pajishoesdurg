@@ -243,9 +243,12 @@ export default function AccountPage() {
                       </li>
                     ))}
                   </ul>
-                  <Link href={`/order/invoice/${o.orderNumber}`} className="mt-2 inline-block text-sm text-paji-orange hover:underline">
+                  <a
+                    href={`/order/invoice/${encodeURIComponent(o.orderNumber)}`}
+                    className="mt-3 inline-flex min-h-10 items-center text-sm font-semibold text-paji-orange underline-offset-2 hover:underline"
+                  >
                     View invoice
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ul>

@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import useEmblaCarousel from "embla-carousel-react";
 
-import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pause, Play, Volume2, VolumeX } from "lucide-react";
 
 import { OptimizedImage } from "@/components/ui/optimized-image";
 
@@ -61,6 +61,8 @@ export function GlimpsesSection({
   const [selected, setSelected] = useState(0);
 
   const [playing, setPlaying] = useState<Record<number, boolean>>({});
+  /** Browsers require muted autoplay; user can unmute from the control. */
+  const [muted, setMuted] = useState(true);
 
 
 
@@ -147,7 +149,7 @@ export function GlimpsesSection({
 
                           className="h-full w-full object-cover"
 
-                          muted
+                          muted={muted}
 
                           playsInline
 
@@ -210,23 +212,25 @@ export function GlimpsesSection({
                       )}
 
                       {isActive && isPlaying && (
-
-                        <button
-
-                          type="button"
-
-                          className="absolute bottom-3 right-3 rounded-full bg-black/50 p-2 text-white"
-
-                          onClick={() => setPlaying((p) => ({ ...p, [video.id]: false }))}
-
-                          aria-label="Pause video"
-
-                        >
-
-                          <Pause className="h-4 w-4" />
-
-                        </button>
-
+                        <>
+                          <button
+                            type="button"
+                            className="absolute bottom-3 left-3 rounded-full bg-black/50 p-2 text-white hover:bg-black/65"
+                            onClick={() => setMuted((m) => !m)}
+                            aria-label={muted ? "Unmute video" : "Mute video"}
+                            aria-pressed={!muted}
+                          >
+                            {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                          </button>
+                          <button
+                            type="button"
+                            className="absolute bottom-3 right-3 rounded-full bg-black/50 p-2 text-white hover:bg-black/65"
+                            onClick={() => setPlaying((p) => ({ ...p, [video.id]: false }))}
+                            aria-label="Pause video"
+                          >
+                            <Pause className="h-4 w-4" />
+                          </button>
+                        </>
                       )}
 
                     </div>

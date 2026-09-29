@@ -32,7 +32,7 @@ export default async function OrderSuccessPage({ searchParams }: { searchParams:
 
         <p className="mt-4 rounded-lg bg-amber-50 p-4 text-sm text-amber-900">
 
-          Cash on Delivery: please keep the order total ready at delivery. This includes a ₹200 courier charge.
+          Cash on Delivery: your ₹200 advance is paid. Please keep the remaining order amount ready in cash at delivery.
 
         </p>
 

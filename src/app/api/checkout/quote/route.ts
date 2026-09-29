@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { applyCoupon, validateCartLines } from "@/lib/checkout";
-import { computeOrderTotal, shippingLineLabel, type PaymentMethod } from "@/lib/order-totals";
+import {
+  computeOrderTotal,
+  getCodAdvanceAmount,
+  shippingLineLabel,
+  type PaymentMethod,
+} from "@/lib/order-totals";
 import { getStoreSettings } from "@/lib/settings";
 import { requireCustomer } from "@/lib/auth/require-customer";
 
@@ -44,6 +49,8 @@ export async function POST(req: Request) {
       settings
     );
 
+    const codAdvance = getCodAdvanceAmount(settings);
+
     return NextResponse.json({
       subtotal: validation.subtotal,
       discount,
@@ -53,9 +60,16 @@ export async function POST(req: Request) {
       tax,
       total,
       paymentMethod,
+      codAdvance: paymentMethod === "cod" ? codAdvance : 0,
+      dueAtDelivery: paymentMethod === "cod" ? total : 0,
+      dueNow: paymentMethod === "cod" ? codAdvance : total,
       codNote:
         paymentMethod === "cod"
-          ? `₹${settings.codCourierCharge ?? 200} courier charge applies on Cash on Delivery (included in total).`
+          ? `Pay ₹${codAdvance} now via Razorpay as COD advance. Remaining ₹${total.toFixed(0)} is due in cash at delivery.`
+          : null,
+      prepaidNote:
+        paymentMethod === "online" && settings.freeShippingAbove
+          ? `Free shipping on prepaid orders above ₹${settings.freeShippingAbove}. Orders below that add ₹100 shipping.`
           : null,
     });
   } catch (e) {

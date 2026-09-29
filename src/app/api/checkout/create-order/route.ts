@@ -10,17 +10,13 @@ import { generateOrderNumber } from "@/lib/orders";
 
 import { validateCartLines, applyCoupon } from "@/lib/checkout";
 
-import { computeOrderTotal, type PaymentMethod } from "@/lib/order-totals";
+import { computeOrderTotal, getCodAdvanceAmount, type PaymentMethod } from "@/lib/order-totals";
 
 import { getStoreSettings } from "@/lib/settings";
 
 import { getRazorpay } from "@/lib/razorpay";
 
-import { getCustomerSession } from "@/lib/auth/session";
-
-import { decreaseStock } from "@/lib/inventory";
-
-
+import { requireCustomer } from "@/lib/auth/require-customer";
 
 const bodySchema = z.object({
 
@@ -30,7 +26,7 @@ const bodySchema = z.object({
 
     mobile: z.string().min(10),
 
-    email: z.union([z.literal(""), z.string().email()]).optional(),
+    email: z.string().email().optional().or(z.literal("")),
 
     address: z.string().min(5),
 
@@ -68,17 +64,23 @@ export async function POST(req: Request) {
 
   try {
 
+    const auth = await requireCustomer();
+
+    if (auth.error) {
+
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+
+    }
+
+    const customer = auth.session!;
+
     const json = await req.json();
 
     const parsed = bodySchema.safeParse(json);
 
     if (!parsed.success) {
 
-      const first = parsed.error.issues[0];
-      return NextResponse.json(
-        { error: first ? `Invalid checkout data: ${first.path.join(".")} ${first.message}` : "Invalid checkout data" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid checkout data" }, { status: 400 });
 
     }
 
@@ -116,10 +118,6 @@ export async function POST(req: Request) {
 
     const orderNumber = await generateOrderNumber();
 
-    const customer = await getCustomerSession();
-
-
-
     const [order] = await db
 
       .insert(orders)
@@ -128,7 +126,7 @@ export async function POST(req: Request) {
 
         orderNumber,
 
-        userId: customer?.userId,
+        userId: customer.userId,
 
         customerName: parsed.data.customer.fullName,
 
@@ -136,7 +134,7 @@ export async function POST(req: Request) {
 
         customerEmail: parsed.data.customer.email || null,
 
-        guestMobile: customer ? null : parsed.data.customer.mobile,
+        guestMobile: null,
 
         shippingAddress: parsed.data.customer.address,
 
@@ -160,7 +158,7 @@ export async function POST(req: Request) {
 
         paymentMethod,
 
-        status: paymentMethod === "cod" ? "confirmed" : "pending",
+        status: "pending",
 
       })
 
@@ -200,7 +198,25 @@ export async function POST(req: Request) {
 
 
 
+    const rzp = getRazorpay();
+
     if (paymentMethod === "cod") {
+
+      const codAdvance = getCodAdvanceAmount(settings);
+
+      const amountPaise = Math.round(codAdvance * 100);
+
+      const rzpOrder = await rzp.orders.create({
+
+        amount: amountPaise,
+
+        currency: "INR",
+
+        receipt: `${orderNumber}-advance`,
+
+      });
+
+
 
       await db.insert(payments).values({
 
@@ -208,29 +224,13 @@ export async function POST(req: Request) {
 
         method: "cod",
 
-        amount: total.toFixed(2),
+        razorpayOrderId: rzpOrder.id,
 
-        status: "pending",
+        amount: codAdvance.toFixed(2),
+
+        status: "created",
 
       });
-
-
-
-      for (const item of validation.items) {
-
-        await decreaseStock({
-
-          productId: item.productId,
-
-          variantId: item.variantId,
-
-          quantity: item.quantity,
-
-          orderId: order.id,
-
-        });
-
-      }
 
 
 
@@ -240,11 +240,19 @@ export async function POST(req: Request) {
 
         paymentMethod: "cod",
 
-        total,
+        razorpayOrderId: rzpOrder.id,
+
+        amount: amountPaise,
+
+        keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+
+        storeName: settings.storeName,
+
+        balanceAtDelivery: total,
+
+        codAdvance,
 
         shipping,
-
-        message: "Order placed. Pay cash on delivery (includes courier charge).",
 
       });
 
@@ -253,8 +261,6 @@ export async function POST(req: Request) {
 
 
     const amountPaise = Math.round(total * 100);
-
-    const rzp = getRazorpay();
 
     const rzpOrder = await rzp.orders.create({
 
@@ -307,10 +313,7 @@ export async function POST(req: Request) {
   } catch (e) {
 
     console.error(e);
-    const message = e instanceof Error ? e.message : "";
-    if (message.includes("Razorpay")) {
-      return NextResponse.json({ error: message }, { status: 500 });
-    }
+
     return NextResponse.json({ error: "Unable to create order" }, { status: 500 });
 
   }

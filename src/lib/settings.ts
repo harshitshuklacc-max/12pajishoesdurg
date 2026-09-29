@@ -35,7 +35,7 @@ export const DEFAULT_SETTINGS: StoreSettings = {
   businessDescription: "Complete variety for mens and ladies",
   storeHours: "Open until 10 PM",
   shippingFlatRate: 0,
-  freeShippingAbove: 999,
+  freeShippingAbove: 1499,
   codCourierCharge: 200,
   taxPercent: 0,
   seoSiteTitle: "Paji Shoes | Premium Footwear in Durg",

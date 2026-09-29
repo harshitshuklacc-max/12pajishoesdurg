@@ -77,13 +77,27 @@ export default async function InvoicePage({ params }: Props) {
           {parseFloat(order.discountAmount || "0") > 0 && <p>Discount: -{formatPrice(order.discountAmount!)}</p>}
           {parseFloat(order.shippingAmount || "0") > 0 && (
             <p>
-              {order.paymentMethod === "cod" ? "Courier (COD)" : "Shipping"}: {formatPrice(order.shippingAmount!)}
+              {order.paymentMethod === "cod" ? "Courier (COD)" : "Shipping (prepaid)"}:{" "}
+              {formatPrice(order.shippingAmount!)}
             </p>
           )}
           {parseFloat(order.taxAmount || "0") > 0 && <p>Tax: {formatPrice(order.taxAmount!)}</p>}
-          <p className="text-lg font-bold text-paji-orange">Total: {formatPrice(order.total)}</p>
+          {order.paymentMethod === "cod" ? (
+            <>
+              <p className="text-lg font-bold text-paji-orange">
+                Pay at delivery: {formatPrice(order.total)}
+              </p>
+              {payment && (
+                <p className="text-sm text-gray-600">
+                  Advance paid (Razorpay): {formatPrice(payment.amount)} · {payment.status}
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="text-lg font-bold text-paji-orange">Total: {formatPrice(order.total)}</p>
+          )}
           <p className="text-gray-500 capitalize">
-            {order.paymentMethod === "cod" ? "Cash on Delivery" : "Online"} · {payment?.status ?? "pending"}
+            {order.paymentMethod === "cod" ? "Cash on Delivery" : "Prepaid (online)"} · {payment?.status ?? "pending"}
           </p>
         </div>
       </div>

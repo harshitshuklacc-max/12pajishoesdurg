@@ -40,6 +40,14 @@ type Quote = {
 
   codNote: string | null;
 
+  prepaidNote: string | null;
+
+  codAdvance: number;
+
+  dueAtDelivery: number;
+
+  dueNow: number;
+
 };
 
 
@@ -248,17 +256,15 @@ export default function CheckoutPage() {
 
 
 
-      if (data.paymentMethod === "cod") {
+      if (!data.razorpayOrderId) {
 
-        clear();
-
-        router.push(`/order/success?order=${data.orderNumber}&cod=1`);
-
-        return;
+        throw new Error("Payment could not be started. Please try again.");
 
       }
 
 
+
+      const isCod = data.paymentMethod === "cod";
 
       const rzp = new window.Razorpay({
 
@@ -270,7 +276,11 @@ export default function CheckoutPage() {
 
         name: data.storeName,
 
-        description: `Order ${data.orderNumber}`,
+        description: isCod
+
+          ? `COD advance · Order ${data.orderNumber}`
+
+          : `Order ${data.orderNumber}`,
 
         order_id: data.razorpayOrderId,
 
@@ -316,7 +326,15 @@ export default function CheckoutPage() {
 
           clear();
 
-          router.push(`/order/success?order=${data.orderNumber}`);
+          router.push(
+
+            isCod
+
+              ? `/order/success?order=${data.orderNumber}&cod=1`
+
+              : `/order/success?order=${data.orderNumber}`
+
+          );
 
         },
 
@@ -352,7 +370,9 @@ export default function CheckoutPage() {
 
   const displaySubtotal = quote?.subtotal ?? subtotal();
 
-  const displayTotal = quote?.total ?? subtotal();
+  const displayTotal = quote?.dueNow ?? quote?.total ?? subtotal();
+
+  const deliveryTotal = quote?.dueAtDelivery ?? quote?.total ?? subtotal();
 
 
 
@@ -450,7 +470,11 @@ export default function CheckoutPage() {
 
                 <span className="block font-medium">Pay online (Razorpay)</span>
 
-                <span className="text-xs text-gray-600">UPI, cards, net banking — standard shipping rules apply</span>
+                <span className="text-xs text-gray-600">
+
+                  UPI, cards, net banking — free shipping above ₹1499; ₹100 shipping below that
+
+                </span>
 
               </span>
 
@@ -490,7 +514,7 @@ export default function CheckoutPage() {
 
                 <span className="text-xs text-gray-600">
 
-                  ₹200 courier charge included — pay product total + ₹200 at delivery
+                  Pay ₹200 advance online now; pay the product balance in cash at delivery
 
                 </span>
 
@@ -510,9 +534,9 @@ export default function CheckoutPage() {
 
               : paymentMethod === "cod"
 
-                ? `Place COD order · ${formatPrice(displayTotal)}`
+                ? `Pay advance · ${formatPrice(displayTotal)}`
 
-                : "Pay with Razorpay"}
+                : `Pay with Razorpay · ${formatPrice(displayTotal)}`}
 
           </Button>
 
@@ -600,13 +624,45 @@ export default function CheckoutPage() {
 
           )}
 
-          <div className="mt-4 flex justify-between text-lg font-bold">
+          {quote?.prepaidNote && paymentMethod === "online" && (
 
-            <span>Total</span>
+            <p className="mt-3 rounded-lg bg-sky-50 p-3 text-xs text-sky-900">{quote.prepaidNote}</p>
 
-            <span className="text-paji-orange">{formatPrice(displayTotal)}</span>
+          )}
 
-          </div>
+          {paymentMethod === "cod" ? (
+
+            <div className="mt-4 space-y-2 text-sm">
+
+              <div className="flex justify-between font-semibold">
+
+                <span>Pay now (Razorpay advance)</span>
+
+                <span className="text-paji-orange">{formatPrice(displayTotal)}</span>
+
+              </div>
+
+              <div className="flex justify-between text-gray-600">
+
+                <span>Pay at delivery (cash)</span>
+
+                <span>{formatPrice(deliveryTotal)}</span>
+
+              </div>
+
+            </div>
+
+          ) : (
+
+            <div className="mt-4 flex justify-between text-lg font-bold">
+
+              <span>Total</span>
+
+              <span className="text-paji-orange">{formatPrice(displayTotal)}</span>
+
+            </div>
+
+          )}
 
         </div>
 

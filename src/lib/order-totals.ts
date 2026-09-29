@@ -1,8 +1,15 @@
 import type { StoreSettings } from "@/lib/settings";
 
-export const COD_COURIER_CHARGE_INR = 200;
+export const COD_ADVANCE_INR = 200;
+export const PREPAID_SHIPPING_FEE_INR = 100;
 
 export type PaymentMethod = "online" | "cod";
+
+export function getCodAdvanceAmount(
+  settings: Pick<StoreSettings, "codCourierCharge">
+): number {
+  return settings.codCourierCharge ?? COD_ADVANCE_INR;
+}
 
 export function computeShippingAmount(
   paymentMethod: PaymentMethod,
@@ -10,19 +17,20 @@ export function computeShippingAmount(
   settings: Pick<StoreSettings, "shippingFlatRate" | "freeShippingAbove" | "codCourierCharge">
 ): number {
   if (paymentMethod === "cod") {
-    return settings.codCourierCharge ?? COD_COURIER_CHARGE_INR;
+    return 0;
   }
-  let shipping = settings.shippingFlatRate;
   if (settings.freeShippingAbove && subtotalAfterDiscount >= settings.freeShippingAbove) {
-    shipping = 0;
+    return 0;
   }
-  return shipping;
+  return PREPAID_SHIPPING_FEE_INR;
 }
 
 export function shippingLineLabel(paymentMethod: PaymentMethod, shipping: number): string {
-  if (shipping <= 0) return "Shipping";
-  if (paymentMethod === "cod") {
-    return "Courier charge (COD — includes delivery)";
+  if (shipping <= 0) {
+    return paymentMethod === "online" ? "Shipping (prepaid)" : "Shipping";
+  }
+  if (paymentMethod === "online") {
+    return "Shipping (orders below free-shipping minimum)";
   }
   return "Shipping";
 }

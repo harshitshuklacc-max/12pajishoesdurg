@@ -68,14 +68,22 @@ export default function AdminSettingsPage() {
       <section className="space-y-3 rounded-xl border bg-white p-5">
         <h2 className="font-semibold">Shipping & tax</h2>
         <Input type="number" placeholder="Flat shipping rate" value={settings.shippingFlatRate} onChange={(e) => setSettings({ ...settings, shippingFlatRate: parseFloat(e.target.value) || 0 })} />
-        <Input type="number" placeholder="Free shipping above" value={settings.freeShippingAbove} onChange={(e) => setSettings({ ...settings, freeShippingAbove: parseFloat(e.target.value) || 0 })} />
         <Input
           type="number"
-          placeholder="COD courier charge (₹)"
+          placeholder="Free prepaid shipping above (₹)"
+          value={settings.freeShippingAbove}
+          onChange={(e) => setSettings({ ...settings, freeShippingAbove: parseFloat(e.target.value) || 0 })}
+        />
+        <Input
+          type="number"
+          placeholder="COD advance (Razorpay, ₹)"
           value={settings.codCourierCharge ?? 200}
           onChange={(e) => setSettings({ ...settings, codCourierCharge: parseFloat(e.target.value) || 0 })}
         />
-        <p className="text-xs text-gray-500">Added to every Cash on Delivery order (includes courier).</p>
+        <p className="text-xs text-gray-500">
+          Collected online when customer chooses COD. Prepaid orders below the free-shipping minimum add ₹100
+          shipping automatically.
+        </p>
         <Input type="number" placeholder="Tax %" value={settings.taxPercent} onChange={(e) => setSettings({ ...settings, taxPercent: parseFloat(e.target.value) || 0 })} />
       </section>
 
