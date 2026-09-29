@@ -90,9 +90,9 @@ export async function Footer({ settings }: { settings: StoreSettings }) {
 
           <div>
 
-            <h3 className="font-serif text-lg text-white">Explore</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-white">Explore</h3>
 
-            <ul className="mt-4 space-y-2.5 text-sm">
+            <ul className="mt-4 space-y-2.5 text-sm font-bold uppercase tracking-wide">
 
               <li><Link href="/about" className="transition hover:text-paji-gold">About Us</Link></li>
 
@@ -108,9 +108,9 @@ export async function Footer({ settings }: { settings: StoreSettings }) {
 
           <div>
 
-            <h3 className="font-serif text-lg text-white">Categories</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-white">Categories</h3>
 
-            <ul className="mt-4 space-y-2.5 text-sm">
+            <ul className="mt-4 space-y-2.5 text-sm font-bold uppercase tracking-wide">
 
               {categoryLinks.length > 0 ? (
 
@@ -134,7 +134,7 @@ export async function Footer({ settings }: { settings: StoreSettings }) {
 
                   <Link href="/categories" className="transition hover:text-paji-gold">
 
-                    Browse categories
+                    Browse Categories
 
                   </Link>
 
@@ -148,7 +148,7 @@ export async function Footer({ settings }: { settings: StoreSettings }) {
 
           <div>
 
-            <h3 className="font-serif text-lg text-white">Visit &amp; Call</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-white">Visit &amp; Call</h3>
 
             <ul className="mt-4 space-y-3 text-sm">
 

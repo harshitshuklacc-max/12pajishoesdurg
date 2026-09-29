@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Instagram } from "lucide-react";
+import { Instagram, ShoppingBag, Sparkles } from "lucide-react";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import type { HeroContent } from "@/lib/homepage";
 import type { StoreSettings } from "@/lib/settings";
@@ -51,15 +51,17 @@ export function BrandHero({
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/shop"
-            className="inline-flex min-w-[160px] items-center justify-center rounded-full bg-paji-orange px-8 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:bg-paji-orange-dark"
+            className="inline-flex min-w-[160px] items-center justify-center gap-2 rounded-full bg-paji-orange px-8 py-3.5 text-sm font-bold uppercase tracking-wide text-white shadow-lg transition hover:bg-paji-orange-dark"
           >
-            🛍 {hero.ctaPrimary}
+            <ShoppingBag className="h-4 w-4 shrink-0" aria-hidden />
+            {hero.ctaPrimary}
           </Link>
           <Link
             href="/categories"
-            className="inline-flex min-w-[160px] items-center justify-center rounded-full border border-white/35 bg-white/5 px-8 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/15"
+            className="inline-flex min-w-[160px] items-center justify-center gap-2 rounded-full border border-white/35 bg-white/5 px-8 py-3.5 text-sm font-bold uppercase tracking-wide text-white backdrop-blur-sm transition hover:bg-white/15"
           >
-            ✨ {hero.ctaSecondary}
+            <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
+            {hero.ctaSecondary}
           </Link>
         </div>
 

@@ -25,7 +25,7 @@ export default async function CategoryPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 lg:px-6">
-      <h1 className="text-3xl font-bold">{cat.name}</h1>
+      <h1 className="text-3xl font-bold uppercase tracking-wide">{cat.name}</h1>
       {cat.description && <p className="mt-2 max-w-2xl text-gray-600">{cat.description}</p>}
       <p className="mt-1 text-sm text-gray-500">{total} product{total === 1 ? "" : "s"}</p>
       <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">

@@ -25,7 +25,17 @@ export async function getHeroContent(): Promise<HeroContent> {
     const row = await db.query.homepageSections.findFirst({
       where: eq(homepageSections.key, "hero"),
     });
-    if (row?.content) return { ...DEFAULT_HERO, ...(row.content as Partial<HeroContent>) };
+    if (row?.content) {
+      const c = row.content as Partial<HeroContent>;
+      return {
+        ...DEFAULT_HERO,
+        ...c,
+        ctaPrimary: c.ctaPrimary?.trim() || DEFAULT_HERO.ctaPrimary,
+        ctaSecondary: c.ctaSecondary?.trim() || DEFAULT_HERO.ctaSecondary,
+        description: c.description?.trim() || DEFAULT_HERO.description,
+        heading: c.heading?.trim() || DEFAULT_HERO.heading,
+      };
+    }
   } catch {
     /* db not ready */
   }
